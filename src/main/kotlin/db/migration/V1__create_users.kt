@@ -4,7 +4,6 @@ import org.flywaydb.core.api.migration.BaseJavaMigration
 import org.flywaydb.core.api.migration.Context
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Users : Table() {
@@ -26,15 +25,5 @@ class V1__create_users_table : BaseJavaMigration() {
 
     private fun createUsersTable() {
         SchemaUtils.create(Users)
-    }
-
-    private fun insertUser(id: String, email: String, password: String, fullname: String, role: String) {
-        Users.insert {
-            it[Users.id] = id.toInt()
-            it[Users.email] = email
-            it[Users.password] = password
-            it[Users.fullname] = fullname
-            it[Users.role] = role
-        }
     }
 }
