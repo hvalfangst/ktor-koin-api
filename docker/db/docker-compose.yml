@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=glossy
+      - POSTGRES_PASSWORD=yellauyellau
+      - POSTGRES_DB=hvalfangst_db
+    ports:
+      - '5433:5432'
