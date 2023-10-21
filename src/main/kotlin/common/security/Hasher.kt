@@ -10,8 +10,13 @@ class Hasher {
          *  Hashes a string with Bcrypt and base64 encodes the associated resulting ByteArray
          */
         fun hash(string: String): String {
-            val hashedPasswordBytes = BCrypt.withDefaults().hash(COST, string.toByteArray());
-            return Base64.getEncoder().encodeToString(hashedPasswordBytes)
+            val startTime = System.currentTimeMillis()
+            val hashedPasswordBytes = BCrypt.withDefaults().hash(COST, string.toByteArray())
+            val base64EncodedPassword = Base64.getEncoder().encodeToString(hashedPasswordBytes)
+            val endTime = System.currentTimeMillis()
+            val elapsedTime = endTime - startTime
+            println("Hashing and encoding took $elapsedTime milliseconds")
+            return base64EncodedPassword
         }
     }
 }
