@@ -1,12 +1,14 @@
 package users.route
 
-import NONEXISTENT_USER
-import USERCREATION_FAILED
+import messages.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.postgresql.util.PSQLException
+import org.postgresql.util.PSQLState
 import users.model.UpsertUserRequest
 import users.model.User
 import users.repository.Repository
@@ -32,6 +34,7 @@ fun Route.users(userRepository: Repository) {
             }
 
         post {
+            try {
                 val request = call.receive<UpsertUserRequest>()
                 val createdUser = userRepository.createUser(request)
 
@@ -41,7 +44,19 @@ fun Route.users(userRepository: Repository) {
                         call.respond(HttpStatusCode.InternalServerError, USERCREATION_FAILED)
                     }
                 }
+               } catch (e: ExposedSQLException) {
+                if (e.cause is PSQLException) {
+                    val pgSqlException = e.cause as PSQLException
+                    if (pgSqlException.sqlState == PSQLState.UNIQUE_VIOLATION.state) {
+                        call.respond(HttpStatusCode.BadRequest, UNIQUE_VIOLATION_EMAIL)
+                    }
+                } else {
+                    call.respond(HttpStatusCode.InternalServerError, USERCREATION_FAILED)
+                }
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, USERCREATION_FAILED)
             }
+        }
 
             put("/{id}") {
                 val id = call.parameters["id"]!!.toInt()
