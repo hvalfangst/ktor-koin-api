@@ -7,6 +7,7 @@
     <version>0.0.1</version>
     <name>hvalfangst.ktor-api-with-auth</name>
     <description>Ktor API with auth</description>
+
     <properties>
         <ktor_version>2.3.5</ktor_version>
         <kotlin.code.style>official</kotlin.code.style>
@@ -19,87 +20,102 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <main.class>io.ktor.server.netty.EngineMain</main.class>
     </properties>
-    <repositories>
-    </repositories>
+
+
     <dependencies>
+
+        <!-- Ktor Server Core - Core module for Ktor server -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-core-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Ktor Serialization Kotlinx JSON - Serialization support for JSON -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-serialization-kotlinx-json-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Ktor Server Content Negotiation - Content negotiation module -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-content-negotiation-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- PostgreSQL Database Driver - JDBC driver for PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgres_version}</version>
         </dependency>
 
+        <!-- Exposed Core - Kotlin SQL framework for Exposed -->
         <dependency>
             <groupId>org.jetbrains.exposed</groupId>
             <artifactId>exposed-core</artifactId>
             <version>${exposed_version}</version>
         </dependency>
 
+        <!-- Exposed JDBC - JDBC support for Exposed SQL framework -->
         <dependency>
             <groupId>org.jetbrains.exposed</groupId>
             <artifactId>exposed-jdbc</artifactId>
             <version>${exposed_version}</version>
         </dependency>
 
+        <!-- Ktor Serialization Jackson - Serialization support for Jackson -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-serialization-jackson-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Ktor Server Auth - Authentication module for Ktor server -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-auth-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Ktor Server Auth JWT - JWT (JSON Web Token) support for Ktor server authentication -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-auth-jwt-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Ktor Server Netty - Netty engine for Ktor server -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-netty-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Logback Classic - Logging framework for Java applications -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback_version}</version>
         </dependency>
 
+        <!-- SLF4J API - Simple Logging Facade for Java (API) -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j_version}</version>
         </dependency>
 
+        <!-- Ktor Server Config YAML - YAML configuration support for Ktor server -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-config-yaml-jvm</artifactId>
-            <version>2.3.5</version>
+            <version>${ktor_version}</version>
         </dependency>
 
+        <!-- Ktor Server Tests - Testing support for Ktor server -->
         <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-tests-jvm</artifactId>
@@ -107,6 +123,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Kotlin Test JUnit - JUnit testing support for Kotlin -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>
@@ -114,6 +131,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Kotlin Coroutines Debug - Coroutines debugging support for Kotlin -->
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-debug</artifactId>
@@ -121,33 +139,50 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Flyway Core - Database migration tool for Java applications -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <version>8.5.13</version>
         </dependency>
 
-
+        <!-- HikariCP - High-performance JDBC connection pool for Java applications -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
         </dependency>
 
+        <!-- Kotlin Stdlib - Kotlin standard library -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
             <version>1.9.10</version>
         </dependency>
 
+        <!-- Bcrypt - Library for hashing and checking passwords using the bcrypt algorithm -->
         <dependency>
             <groupId>at.favre.lib</groupId>
             <artifactId>bcrypt</artifactId>
             <version>0.10.2</version>
         </dependency>
 
+        <!-- Ktor Server Auth - Additional authentication module for Ktor server -->
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-auth</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <!-- Ktor Server Auth JWT - Additional JWT support for Ktor server authentication -->
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-auth-jwt</artifactId>
+            <version>2.3.2</version>
+        </dependency>
 
     </dependencies>
+
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -158,70 +193,8 @@
         </resources>
 
         <plugins>
-            <plugin>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <version>${kotlin_version}</version>
-                <configuration>
-                    <jvmTarget>1.8</jvmTarget>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>${main.class}</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>${main.class}</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>assemble-all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
+            <!-- Kotlin Maven Plugin -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -248,6 +221,51 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
+            <!-- Maven Assembly Plugin: Used to create JARs -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>${main.class}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>assemble-all</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Exec Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

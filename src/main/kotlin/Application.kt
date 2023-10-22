@@ -1,4 +1,6 @@
-import db.DatabaseFactory
+import common.config.loadAppConfiguration
+import common.security.JwtUtil
+import common.db.DatabaseFactory
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -11,16 +13,19 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val jdbcUrl = environment.config.propertyOrNull("db.jdbcUrl")?.getString() ?: "NIL"
-    DatabaseFactory.connectAndMigrate(jdbcUrl)
-
-    val usersRepository = usersRepo()
 
     install(ContentNegotiation) {
         json()
     }
 
+    val appConfig = loadAppConfiguration(environment)
+    val jwtUtil = JwtUtil(appConfig)
+    DatabaseFactory.connectAndMigrate(appConfig.jdbcUrl, appConfig.flywayMigrationPath)
+    val usersRepository = usersRepo()
+
+
+
     install(Routing) {
-        users(usersRepository)
+        users(jwtUtil, usersRepository)
     }
 }

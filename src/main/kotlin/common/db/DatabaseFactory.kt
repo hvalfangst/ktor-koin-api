@@ -1,4 +1,4 @@
-package db
+package common.db
 
 import org.flywaydb.core.Flyway
 import com.zaxxer.hikari.HikariConfig
@@ -14,10 +14,10 @@ object DatabaseFactory {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun connectAndMigrate(jdbcUrl: String) {
+    fun connectAndMigrate(jdbcUrl: String, migrationPath: String) {
         val pool = createConnectionPool(jdbcUrl)
         Database.connect(pool)
-        runFlyway(pool)
+        runFlyway(pool, migrationPath)
     }
 
     private fun createConnectionPool(jdbcUrl: String): HikariDataSource {
@@ -32,16 +32,19 @@ object DatabaseFactory {
         return HikariDataSource(config)
     }
 
-    private fun runFlyway(datasource: DataSource) {
-        val flyway = Flyway.configure().dataSource(datasource).load()
+    private fun runFlyway(datasource: DataSource, migrationPath: String) {
+        val flyway = Flyway.configure()
+            .dataSource(datasource)
+            .locations(migrationPath)
+            .load()
         try {
             flyway.info()
             flyway.migrate()
         } catch (e: Exception) {
-            log.error("Exception running flyway db.migration", e)
+            log.error("Exception running Flyway migration", e)
             throw e
         }
-        log.info("Flyway db.migration has finished")
+        log.info("Flyway migration has finished")
     }
 
     // Utilized in order to execute transactions in coroutine scope
@@ -50,5 +53,4 @@ object DatabaseFactory {
     ): T = withContext(Dispatchers.IO) {
         transaction { block() }
     }
-
 }

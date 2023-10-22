@@ -1,7 +1,7 @@
 package users.repository
 
 import common.security.Hasher
-import db.DatabaseFactory.dbExec
+import common.db.DatabaseFactory.dbExec
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import users.model.UpsertUserRequest
@@ -34,7 +34,6 @@ class Repository {
 
     suspend fun createUser(request: UpsertUserRequest): User? {
         var createdUserId: Int? = null
-        val startTime = System.currentTimeMillis()
         val hashedPassword = Hasher.hash(request.password)
 
         dbExec {
@@ -46,11 +45,6 @@ class Repository {
             } get UsersTable.id
         }
 
-        val endTime = System.currentTimeMillis()
-        val elapsedTime = endTime - startTime
-        println("Database persistence took $elapsedTime milliseconds")
-
-        // Retrieve the created user from the database
         return createdUserId?.let { getUserById(it) }
     }
 
