@@ -1,17 +1,17 @@
 package users.route
 
-import common.security.Hasher
+import UpsertUserRequest
+import common.messages.ErrorMessage
 import common.security.JwtUtil
+import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import common.messages.ErrorMessage
-import io.ktor.server.auth.*
-import users.model.UpsertUserRequest
 import users.model.User
 import users.repository.Repository
-import java.util.*
 
 fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
     route("/users") {
@@ -57,10 +57,13 @@ fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
                     }
                 }
             } catch (e: Exception) {
-                call.respond(
-                    ErrorMessage.USER_CREATION_FAILED.httpStatusCode,
-                    ErrorMessage.USER_CREATION_FAILED.message
-                )
+                if (e is BadRequestException) {
+                    e.printStackTrace()
+                    call.respond(ErrorMessage.REQUEST_BODY_VALIDATION_FAILURE.httpStatusCode, ErrorMessage.REQUEST_BODY_VALIDATION_FAILURE.message)
+                } else {
+                    e.printStackTrace()
+                    call.respond(ErrorMessage.USER_CREATION_FAILED.httpStatusCode, ErrorMessage.USER_CREATION_FAILED.message)
+                }
             }
         }
 
@@ -97,7 +100,7 @@ fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
             post {
                 val principal = call.principal<UserIdPrincipal>()
                 if (principal != null) {
-                    val (username, role) = principal.name.split(":")
+                    val (username, role) = principal.name.split("|GUARDIAN|")
                     val token = jwtUtil.generateToken(username, role)
                     call.respond(hashMapOf("token" to token))
                 } else {

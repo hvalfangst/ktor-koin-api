@@ -34,7 +34,7 @@ fun Application.module() {
                 val (username, password) = credentials
                 val user = UsersRepo().getUserByEmail(username)
                 if (user != null && Hasher.verify(password, user.password)) {
-                    UserIdPrincipal(username + ":" + user.role)
+                    UserIdPrincipal("$username|GUARDIAN|${user.role}")
                 } else {
                     null
                 }

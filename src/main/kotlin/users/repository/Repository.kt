@@ -1,10 +1,10 @@
 package users.repository
 
+import UpsertUserRequest
 import common.security.Hasher
 import common.db.DatabaseFactory.dbExec
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import users.model.UpsertUserRequest
 import users.model.User
 import users.model.UsersTable
 
