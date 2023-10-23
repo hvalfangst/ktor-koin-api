@@ -1,6 +1,6 @@
-import common.config.loadAppConfiguration
+import common.config.initializeAppConfigSingleton
 import common.security.JwtUtil
-import common.db.DatabaseFactory
+import common.db.DatabaseManager
 import common.security.Hasher
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -15,12 +15,12 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val appConfig = loadAppConfiguration(environment)
 
-    // Connect to the database and run migrations
-    DatabaseFactory.connectAndMigrate(appConfig.jdbcUrl, appConfig.flywayMigrationPath)
+    // Initialize global singleton for accessing environment variables derived from 'application.yml'
+    initializeAppConfigSingleton(environment)
 
-    install(SimplePlugin)
+    // Connect to the database and run  flyway migrations
+    DatabaseManager.connectAndMigrate()
 
     // Configure content negotiation to handle JSON
     install(ContentNegotiation) {
@@ -44,10 +44,6 @@ fun Application.module() {
 
     // Define the 'users' route and configure it with JWT authentication and the user repository
     install(Routing) {
-        users(JwtUtil(appConfig), UsersRepo())
+        users(JwtUtil(), UsersRepo())
     }
-}
-
-val SimplePlugin = createApplicationPlugin(name = "SimplePlugin") {
-    println("SimplePlugin is installed!")
 }
