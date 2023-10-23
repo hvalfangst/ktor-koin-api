@@ -14,11 +14,20 @@ enum class ErrorMessage(val message: String, val httpStatusCode: HttpStatusCode)
     USER_UPDATE_FAILED("Failed to update user", HttpStatusCode.BadRequest),
     USER_DELETION_FAILED("Failed to delete user", HttpStatusCode.BadRequest),
 
+    // Hero related errors
+    HERO_ALREADY_EXISTS("A hero associated with the given name already exists in the system", HttpStatusCode.BadRequest),
+    HERO_NONEXISTENT("The requested hero does not exist", HttpStatusCode.NotFound),
+    HERO_CREATION_FAILED("Failed to create hero", HttpStatusCode.BadRequest),
+    HERO_UPDATE_FAILED("Failed to update hero", HttpStatusCode.BadRequest),
+    HERO_DELETION_FAILED("Failed to delete hero", HttpStatusCode.BadRequest),
+
     // Request body error
-    REQUEST_BODY_VALIDATION_FAILURE("Validation of request body fields failed", HttpStatusCode.BadRequest),
+    REQUEST_BODY_VALIDATION_FAILURE("Validation of request body failed", HttpStatusCode.BadRequest),
 
     // Authentication and authorization related errors
     AUTH_INVALID_HEADER("Missing or malformed authorization header detected", HttpStatusCode.Unauthorized),
     AUTH_MISSING_USER("Failed to identify any users matching mail associated with 'username' in Basic header", HttpStatusCode.Unauthorized),
-    AUTH_PASSWORD_MISMATCH("Password mismatch between header content and database detected", HttpStatusCode.Unauthorized)
+    AUTH_PASSWORD_MISMATCH("Password mismatch between header content and database detected", HttpStatusCode.Unauthorized);
+
+
 }
