@@ -1,9 +1,8 @@
 package users.route
 
-import UpsertUserRequest
+import users.model.UpsertUserRequest
 import common.messages.ErrorMessage
 import common.security.JwtUtil
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.*

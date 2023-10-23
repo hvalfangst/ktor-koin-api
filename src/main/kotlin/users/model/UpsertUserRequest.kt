@@ -1,3 +1,5 @@
+package users.model
+
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -5,24 +7,36 @@ data class UpsertUserRequest(
     val email: String,
     val password: String,
     val fullname: String,
-    val role: String
+    val role: Role
 ) {
     init {
         require(isValidEmail(email)) { "Invalid email address format" }
+        require(isValidFullName(fullname)) { "Invalid fullname format" }
+    }
+
+    /**
+    * Validates a full name to ensure it contains only letters and spaces and enforces a maximum length.
+    *
+    * @param fullname The full name to be validated.
+    * @return `true` if the full name is valid; `false` otherwise.
+    */
+    private fun isValidFullName(fullname: String): Boolean {
+        val fullnameRegex = Regex("^[A-Za-z ]{1,64}\$")
+        return fullname.matches(fullnameRegex)
     }
 
     /** Regular expression to validate email addresses:
        ------------------------------------------------------------------------------
-         ^[A-Za-z] - Start with a letter (case insensitive)
-         (.*) - Match any characters (zero or more) before the '@' symbol
-         [@]{1} - Match exactly one '@' symbol
-        (.{1,}) - Match one or more characters after the '@' symbol (the domain part)
-        \\. - Match a dot (.) after the domain part
-        (.{1,}) - Match one or more characters after the dot (TLD - Top-Level Domain)
+         ^[A-Za-z] - Start with any upper or lower-case letter
+         (.*) - Match up to 64 characters before the '@' symbol
+         [@] - Match exactly one '@' symbol
+        (.+) - Match one or more characters after the '@' symbol (the domain part)
+        \\. - Match exactly one dot (.) after the domain part
+        (.{1,3}) - Match one to three characters after the dot (TLD - Top-Level Domain)
     -----------------------------------------------------------------------------------
      */
     private fun isValidEmail(email: String): Boolean {
-        val emailRegex = Regex("^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})")
+        val emailRegex = Regex("^[A-Za-z](.*){1,64}([@])(.+){1,255}(\\.)(.{1,3})")
         return email.matches(emailRegex)
     }
 }

@@ -1,8 +1,8 @@
 package users.repository
 
-import UpsertUserRequest
+import users.model.UpsertUserRequest
+import common.db.DatabaseManager.executeInTransaction
 import common.security.Hasher
-import common.db.DatabaseFactory.dbExec
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import users.model.User
@@ -11,13 +11,13 @@ import users.model.UsersTable
 class Repository {
 
     suspend fun getAllUsers(): List<User> {
-        return dbExec {
+        return executeInTransaction {
             UsersTable.selectAll().map { toUser(it) }
         }
     }
 
     suspend fun getUserById(id: Int): User? {
-        return dbExec {
+        return executeInTransaction {
             UsersTable.select { UsersTable.id eq id }
                 .map { toUser(it) }
                 .singleOrNull()
@@ -25,7 +25,7 @@ class Repository {
     }
 
     suspend fun getUserByEmail(email: String): User? {
-        return dbExec {
+        return executeInTransaction {
             UsersTable.select { UsersTable.email eq email }
                 .map { toUser(it) }
                 .singleOrNull()
@@ -36,12 +36,12 @@ class Repository {
         var createdUserId: Int? = null
         val hashedPassword = Hasher.hash(request.password)
 
-        dbExec {
+        executeInTransaction {
             createdUserId = UsersTable.insert {
                 it[email] = request.email
                 it[password] = hashedPassword
                 it[fullname] = request.fullname
-                it[role] = request.role
+                it[role] = request.role.roleName
             } get UsersTable.id
         }
 
@@ -49,18 +49,18 @@ class Repository {
     }
 
     suspend fun updateUser(id: Int, request: UpsertUserRequest): User? {
-        dbExec {
+        executeInTransaction {
             UsersTable.update({ UsersTable.id eq id }) {
                 it[email] = request.email
                 it[password] = Hasher.hash(request.password)
                 it[fullname] = request.fullname
-                it[role] = request.role
+                it[role] = request.role.roleName
             }
         }
         return getUserById(id)
     }
 
-    suspend fun deleteUser(id: Int): Boolean = dbExec {
+    suspend fun deleteUser(id: Int): Boolean = executeInTransaction {
         val deletedRows = UsersTable.deleteWhere { UsersTable.id eq id }
         deletedRows > 0
     }
