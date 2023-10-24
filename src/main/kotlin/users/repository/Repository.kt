@@ -40,7 +40,7 @@ class Repository {
             createdUserId = UsersTable.insert {
                 it[email] = request.email
                 it[password] = hashedPassword
-                it[fullname] = request.fullname
+                it[fullname] = request.fullName
                 it[role] = request.role.roleName
             } get UsersTable.id
         }
@@ -53,7 +53,7 @@ class Repository {
             UsersTable.update({ UsersTable.id eq id }) {
                 it[email] = request.email
                 it[password] = Hasher.hash(request.password)
-                it[fullname] = request.fullname
+                it[fullname] = request.fullName
                 it[role] = request.role.roleName
             }
         }

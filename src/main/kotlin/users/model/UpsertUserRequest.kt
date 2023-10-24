@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 data class UpsertUserRequest(
     val email: String,
     val password: String,
-    val fullname: String,
+    val fullName: String,
     val role: Role
 ) {
     init {
         require(isValidEmail(email)) { "Invalid email address format" }
-        require(isValidFullName(fullname)) { "Invalid fullname format" }
+        require(isValidFullName(fullName)) { "Invalid fullname format" }
     }
 
     /**

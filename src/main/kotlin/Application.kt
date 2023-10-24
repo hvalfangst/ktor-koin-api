@@ -1,3 +1,6 @@
+import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.interfaces.DecodedJWT
+import com.auth0.jwt.interfaces.Payload
 import common.config.initializeAppConfigSingleton
 import common.security.JwtUtil
 import common.db.DatabaseManager
@@ -6,6 +9,7 @@ import heroes.route.heroes
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
 import users.repository.Repository as UsersRepo
@@ -18,6 +22,7 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
 
+
     // Initialize singleton for accessing environment variables derived from 'application.yml'
     val configSingleton = initializeAppConfigSingleton(environment)
 
@@ -29,14 +34,18 @@ fun Application.module() {
         json()
     }
 
+    // Configure JWT utility class
+    val jwtUtil = JwtUtil(configSingleton)
+
     // Configure authentication middleware, which is used in endpoint 'login' for context 'users'
     install(Authentication) {
         basicAuthMiddleware()
+        jwtAuthMiddleware(jwtUtil)
     }
 
     // Configure routes '/users' and '/heroes'
     install(Routing) {
-        users(JwtUtil(configSingleton), UsersRepo())
+        users(jwtUtil, UsersRepo())
         heroes(HeroesRepo())
     }
 }
@@ -54,3 +63,32 @@ private fun AuthenticationConfig.basicAuthMiddleware() {
         }
     }
 }
+
+private fun AuthenticationConfig.jwtAuthMiddleware(jwtUtil: JwtUtil) {
+    bearer("auth-jwt") {
+        authenticate { credential ->
+            val decodedJWT = jwtUtil.verifyToken(credential.token)
+            val usernameClaim = decodedJWT.getClaim("username")
+            val roleClaim = decodedJWT.getClaim("role")
+
+            if (!usernameClaim.isNull && !roleClaim.isNull) {
+                val username = usernameClaim.asString()
+                val role = roleClaim.asString()
+
+                // Log token details and checks
+                println("Decoded Token: $decodedJWT")
+                println("Username: $username, Role: $role")
+
+                // Check if the user has the required role (if specified)
+                if (role == "ADMIN") {
+                    UserIdPrincipal("$username|GUARDIAN|$role")
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        }
+    }
+}
+

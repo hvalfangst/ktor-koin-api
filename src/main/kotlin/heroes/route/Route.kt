@@ -5,6 +5,7 @@ import heroes.model.Hero
 import heroes.model.UpsertHeroRequest
 import heroes.repository.Repository
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -32,9 +33,10 @@ fun Route.heroes(heroRepository: Repository) {
             }
         }
 
-        post {
-            try {
-                val request = call.receive<UpsertHeroRequest>()
+        authenticate("auth-jwt") {
+            post {
+                try {
+                    val request = call.receive<UpsertHeroRequest>()
                     val createdHero = heroRepository.createHero(request)
                     if (createdHero != null) {
                         call.respond(createdHero)
@@ -44,13 +46,14 @@ fun Route.heroes(heroRepository: Repository) {
                             ErrorMessage.HERO_CREATION_FAILED.message
                         )
                     }
-            } catch (e: Exception) {
-                if (e is BadRequestException) {
-                    e.printStackTrace()
-                    call.respond(ErrorMessage.REQUEST_BODY_VALIDATION_FAILURE.httpStatusCode, ErrorMessage.REQUEST_BODY_VALIDATION_FAILURE.message)
-                } else {
-                    e.printStackTrace()
-                    call.respond(ErrorMessage.HERO_CREATION_FAILED.httpStatusCode, ErrorMessage.HERO_CREATION_FAILED.message)
+                } catch (e: Exception) {
+                    if (e is BadRequestException) {
+                        e.printStackTrace()
+                        call.respond(ErrorMessage.REQUEST_BODY_VALIDATION_FAILURE.httpStatusCode, ErrorMessage.REQUEST_BODY_VALIDATION_FAILURE.message)
+                    } else {
+                        e.printStackTrace()
+                        call.respond(ErrorMessage.HERO_CREATION_FAILED.httpStatusCode, ErrorMessage.HERO_CREATION_FAILED.message)
+                    }
                 }
             }
         }
