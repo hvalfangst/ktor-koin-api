@@ -2,7 +2,7 @@ package common.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import common.config.AppConfig
+import common.config.AppConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.flywaydb.core.Flyway
@@ -22,10 +22,10 @@ object DatabaseManager {
     /**
      * Establishes a database connection using HikariCP connection pool and runs Flyway migrations.
      */
-    fun connectAndMigrate() {
-        val pool = createConnectionPool()
+    fun connectAndMigrate(appConfig: AppConfiguration) {
+        val pool = createConnectionPool(appConfig)
         Database.connect(pool)
-        runFlyway(pool)
+        runFlyway(appConfig, pool)
     }
 
     /**
@@ -33,10 +33,10 @@ object DatabaseManager {
      *
      * @return HikariCP data source.
      */
-    private fun createConnectionPool(): HikariDataSource {
+    private fun createConnectionPool(appConfiguration: AppConfiguration): HikariDataSource {
         val config = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
-            this.jdbcUrl = AppConfig.instance.jdbcUrl
+            this.jdbcUrl = appConfiguration.jdbcUrl
             maximumPoolSize = 3
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
@@ -50,10 +50,10 @@ object DatabaseManager {
      *
      * @param datasource The data source for the database.
      */
-    private fun runFlyway(datasource: DataSource) {
+    private fun runFlyway(appConfig: AppConfiguration, datasource: DataSource) {
         val flyway = Flyway.configure()
             .dataSource(datasource)
-            .locations(AppConfig.instance.flywayMigrationPath)
+            .locations(appConfig.flywayMigrationPath)
             .load()
         try {
             flyway.info()

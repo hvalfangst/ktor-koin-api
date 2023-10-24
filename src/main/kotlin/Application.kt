@@ -18,11 +18,11 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
 
-    // Initialize global singleton for accessing environment variables derived from 'application.yml'
-    initializeAppConfigSingleton(environment)
+    // Initialize singleton for accessing environment variables derived from 'application.yml'
+    val configSingleton = initializeAppConfigSingleton(environment)
 
     // Connect to the database and run  flyway migrations
-    DatabaseManager.connectAndMigrate()
+    DatabaseManager.connectAndMigrate(configSingleton)
 
     // Configure content negotiation to handle JSON
     install(ContentNegotiation) {
@@ -36,7 +36,7 @@ fun Application.module() {
 
     // Configure routes '/users' and '/heroes'
     install(Routing) {
-        users(JwtUtil(), UsersRepo())
+        users(JwtUtil(configSingleton), UsersRepo())
         heroes(HeroesRepo())
     }
 }
