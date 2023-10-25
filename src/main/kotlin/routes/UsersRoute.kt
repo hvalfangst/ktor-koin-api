@@ -1,6 +1,6 @@
-package users.route
+package routes
 
-import users.model.UpsertUserRequest
+import models.requests.UpsertUserRequest
 import common.messages.ErrorMessage
 import common.security.JwtUtil
 import io.ktor.server.application.*
@@ -9,20 +9,20 @@ import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import users.model.User
-import users.repository.Repository
+import models.User
+import services.UserService
 
-fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
+fun Route.usersRoute(jwtUtil: JwtUtil, userService: UserService) {
     route("/users") {
 
         get {
-            val users: List<User> = userRepository.getAllUsers()
+            val users: List<User> = userService.getAllUsers()
             call.respond(users)
         }
 
         get("/{id}") {
             val id = call.parameters["id"]!!.toInt()
-            val user: User? = userRepository.getUserById(id)
+            val user: User? = userService.getUserById(id)
 
             when (user != null) {
                 true -> call.respond(user)
@@ -37,7 +37,7 @@ fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
         post {
             try {
                 val request = call.receive<UpsertUserRequest>()
-                val existingUser = userRepository.getUserByEmail(request.email)
+                val existingUser = userService.getUserByEmail(request.email)
 
                 if (existingUser != null) {
                     call.respond(
@@ -45,7 +45,7 @@ fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
                         ErrorMessage.USER_ALREADY_EXISTS.message
                     )
                 } else {
-                    val createdUser = userRepository.createUser(request)
+                    val createdUser = userService.createUser(request)
                     if (createdUser != null) {
                         call.respond(createdUser)
                     } else {
@@ -69,7 +69,7 @@ fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
         put("/{id}") {
             val id = call.parameters["id"]!!.toInt()
             val request = call.receive<UpsertUserRequest>()
-            val updatedUser = userRepository.updateUser(id, request)
+            val updatedUser = userService.updateUser(id, request)
 
             when (updatedUser != null) {
                 true -> call.respond(updatedUser)
@@ -83,7 +83,7 @@ fun Route.users(jwtUtil: JwtUtil, userRepository: Repository) {
         delete("/{id}") {
             val id = call.parameters["id"]!!.toInt()
 
-            when (userRepository.deleteUser(id)) {
+            when (userService.deleteUser(id)) {
                 true -> call.respond("User with ID $id has been deleted")
                 false -> call.respond(
                     ErrorMessage.USER_DELETION_FAILED.httpStatusCode,

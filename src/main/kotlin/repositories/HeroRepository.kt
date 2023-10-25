@@ -1,40 +1,32 @@
-package heroes.repository
+package repositories
 
-import common.db.DatabaseManager.executeInTransaction
-import heroes.model.Hero
-import heroes.model.HeroesTable
-import heroes.model.UpsertHeroRequest
+import models.Hero
+import models.tables.HeroesTable
+import models.requests.UpsertHeroRequest
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
-class Repository {
+class HeroRepository {
 
-    suspend fun getAllHeroes(): List<Hero> {
-        return executeInTransaction {
-            HeroesTable.selectAll().map { toHero(it) }
-        }
+     fun getAllHeroes(): List<Hero> {
+        return HeroesTable.selectAll().map { toHero(it) }
     }
 
-    suspend fun getHeroById(id: Int): Hero? {
-        return executeInTransaction {
-            HeroesTable.select { HeroesTable.id eq id }
+     fun getHeroById(id: Int): Hero? {
+        return HeroesTable.select { HeroesTable.id eq id }
                 .map { toHero(it) }
                 .singleOrNull()
-        }
     }
 
-    suspend fun getHeroByName(name: String): Hero? {
-        return executeInTransaction {
-            HeroesTable.select { HeroesTable.name eq name }
+     fun getHeroByName(name: String): Hero? {
+        return HeroesTable.select { HeroesTable.name eq name }
                 .map { toHero(it) }
                 .singleOrNull()
-        }
     }
 
-    suspend fun createHero(request: UpsertHeroRequest): Hero? {
+     fun createHero(request: UpsertHeroRequest): Hero? {
         var createdHeroId: Int? = null
 
-        executeInTransaction {
             createdHeroId = HeroesTable.insert {
                 it[name] = request.name
                 it[hitPoints] = request.hitPoints
@@ -42,13 +34,11 @@ class Repository {
                 it[damage] = request.damage
                 it[armorClass] = request.armorClass
             } get HeroesTable.id
-        }
 
         return createdHeroId?.let { getHeroById(it) }
     }
 
-    suspend fun updateHero(id: Int, request: UpsertHeroRequest): Hero? {
-        executeInTransaction {
+     fun updateHero(id: Int, request: UpsertHeroRequest): Hero? {
             HeroesTable.update({ HeroesTable.id eq id }) {
                 it[name] = request.name
                 it[hitPoints] = request.hitPoints
@@ -56,13 +46,12 @@ class Repository {
                 it[damage] = request.damage
                 it[armorClass] = request.armorClass
             }
-        }
         return getHeroById(id)
     }
 
-    suspend fun deleteHero(id: Int): Boolean = executeInTransaction {
+    fun deleteHero(id: Int): Boolean {
         val deletedRows = HeroesTable.deleteWhere { HeroesTable.id eq id }
-        deletedRows > 0
+        return deletedRows > 0
     }
 
     private fun toHero(row: ResultRow): Hero =

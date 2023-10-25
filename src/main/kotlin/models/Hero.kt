@@ -1,9 +1,10 @@
-package heroes.model
+package models
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UpsertHeroRequest(
+data class Hero(
+    val id: Int,
     val name: String,
     val hitPoints: Int,
     val attack: Int,

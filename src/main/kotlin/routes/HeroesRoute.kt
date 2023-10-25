@@ -1,27 +1,29 @@
-package heroes.route
+package routes
 
 import common.messages.ErrorMessage
-import heroes.model.Hero
-import heroes.model.UpsertHeroRequest
-import heroes.repository.Repository
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.pipeline.*
+import models.Hero
+import models.requests.UpsertHeroRequest
+import services.HeroService
 
-fun Route.heroes(heroRepository: Repository) {
+fun Route.heroesRoute(heroService: HeroService) {
     route("/heroes") {
 
         get {
-            val heroes: List<Hero> = heroRepository.getAllHeroes()
+            val heroes: List<Hero> = heroService.getAllHeroes()
             call.respond(heroes)
         }
 
         get("/{id}") {
             val id = call.parameters["id"]!!.toInt()
-            val hero: Hero? = heroRepository.getHeroById(id)
+            val hero: Hero? = heroService.getHeroById(id)
 
             when (hero != null) {
                 true -> call.respond(hero)
@@ -35,9 +37,11 @@ fun Route.heroes(heroRepository: Repository) {
 
         authenticate("auth-jwt") {
             post {
+                enforceRequiredRole("CREATOR")
+
                 try {
                     val request = call.receive<UpsertHeroRequest>()
-                    val createdHero = heroRepository.createHero(request)
+                    val createdHero = heroService.createHero(request)
                     if (createdHero != null) {
                         call.respond(createdHero)
                     } else {
@@ -61,7 +65,7 @@ fun Route.heroes(heroRepository: Repository) {
         put("/{id}") {
             val id = call.parameters["id"]!!.toInt()
             val request = call.receive<UpsertHeroRequest>()
-            val updatedHero = heroRepository.updateHero(id, request)
+            val updatedHero = heroService.updateHero(id, request)
 
             when (updatedHero != null) {
                 true -> call.respond(updatedHero)
@@ -75,7 +79,7 @@ fun Route.heroes(heroRepository: Repository) {
         delete("/{id}") {
             val id = call.parameters["id"]!!.toInt()
 
-            when (heroRepository.deleteHero(id)) {
+            when (heroService.deleteHero(id)) {
                 true -> call.respond("User with ID $id has been deleted")
                 false -> call.respond(
                     ErrorMessage.HERO_DELETION_FAILED.httpStatusCode,
@@ -84,5 +88,12 @@ fun Route.heroes(heroRepository: Repository) {
 
             }
         }
+    }
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.enforceRequiredRole(requiredRole: String) {
+    val user = call.authentication.principal<UserIdPrincipal>()
+    if (user == null || user.name != requiredRole) {
+        call.respond(HttpStatusCode.Forbidden, "Access Denied")
     }
 }

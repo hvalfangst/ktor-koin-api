@@ -1,6 +1,6 @@
 package common.db.migration
 
-import heroes.model.HeroesTable
+import models.tables.HeroesTable
 import org.flywaydb.core.api.migration.BaseJavaMigration
 import org.flywaydb.core.api.migration.Context
 import org.jetbrains.exposed.sql.SchemaUtils

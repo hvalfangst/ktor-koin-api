@@ -1,20 +1,18 @@
-import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.interfaces.DecodedJWT
-import com.auth0.jwt.interfaces.Payload
 import common.config.initializeAppConfigSingleton
-import common.security.JwtUtil
 import common.db.DatabaseManager
 import common.security.Hasher
-import heroes.route.heroes
+import common.security.JwtUtil
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
-import users.repository.Repository as UsersRepo
-import heroes.repository.Repository as HeroesRepo
-import users.route.users
+import repositories.UserRepository
+import routes.heroesRoute
+import routes.usersRoute
+import services.UserService
+import repositories.HeroRepository
+import services.HeroService
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -45,8 +43,8 @@ fun Application.module() {
 
     // Configure routes '/users' and '/heroes'
     install(Routing) {
-        users(jwtUtil, UsersRepo())
-        heroes(HeroesRepo())
+        usersRoute(jwtUtil, UserService(UserRepository()))
+        heroesRoute(HeroService(HeroRepository()))
     }
 }
 
@@ -54,7 +52,7 @@ private fun AuthenticationConfig.basicAuthMiddleware() {
     basic("auth-basic") {
         validate { credentials ->
             val (username, password) = credentials
-            val user = UsersRepo().getUserByEmail(username)
+            val user = UserRepository().getUserByEmail(username)
             if (user != null && Hasher.verify(password, user.password)) {
                 UserIdPrincipal("$username|GUARDIAN|${user.role}")
             } else {
@@ -72,19 +70,8 @@ private fun AuthenticationConfig.jwtAuthMiddleware(jwtUtil: JwtUtil) {
             val roleClaim = decodedJWT.getClaim("role")
 
             if (!usernameClaim.isNull && !roleClaim.isNull) {
-                val username = usernameClaim.asString()
                 val role = roleClaim.asString()
-
-                // Log token details and checks
-                println("Decoded Token: $decodedJWT")
-                println("Username: $username, Role: $role")
-
-                // Check if the user has the required role (if specified)
-                if (role == "ADMIN") {
-                    UserIdPrincipal("$username|GUARDIAN|$role")
-                } else {
-                    null
-                }
+                UserIdPrincipal(role)
             } else {
                 null
             }

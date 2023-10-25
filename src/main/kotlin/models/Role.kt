@@ -1,4 +1,4 @@
-package users.model
+package models
 
 enum class Role(val roleName: String) {
     VIEWER( "VIEWER"),

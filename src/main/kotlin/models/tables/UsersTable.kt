@@ -1,4 +1,4 @@
-package users.model
+package models.tables
 
 import org.jetbrains.exposed.sql.Table
 

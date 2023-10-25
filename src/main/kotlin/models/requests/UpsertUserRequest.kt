@@ -1,6 +1,7 @@
-package users.model
+package models.requests
 
 import kotlinx.serialization.Serializable
+import models.Role
 
 @Serializable
 data class UpsertUserRequest(

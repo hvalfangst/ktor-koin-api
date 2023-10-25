@@ -1,4 +1,4 @@
-package heroes.model
+package models.tables
 
 import org.jetbrains.exposed.sql.Table
 
