@@ -1,7 +1,7 @@
 package routes
 
-import models.requests.UpsertUserRequest
 import common.messages.ErrorMessage
+import common.security.AccessControl.Companion.DELIMITER
 import common.security.JwtUtil
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -10,9 +10,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import models.User
+import models.requests.UpsertUserRequest
+import org.koin.ktor.ext.inject
 import services.UserService
 
-fun Route.usersRoute(jwtUtil: JwtUtil, userService: UserService) {
+fun Route.usersRoute() {
+    val userService: UserService by inject()
+    val jwtUtil: JwtUtil by inject()
+
     route("/users") {
 
         get {
@@ -46,14 +51,7 @@ fun Route.usersRoute(jwtUtil: JwtUtil, userService: UserService) {
                     )
                 } else {
                     val createdUser = userService.createUser(request)
-                    if (createdUser != null) {
-                        call.respond(createdUser)
-                    } else {
-                        call.respond(
-                            ErrorMessage.USER_CREATION_FAILED.httpStatusCode,
-                            ErrorMessage.USER_CREATION_FAILED.message
-                        )
-                    }
+                    call.respond(createdUser)
                 }
             } catch (e: Exception) {
                 if (e is BadRequestException) {
@@ -99,8 +97,8 @@ fun Route.usersRoute(jwtUtil: JwtUtil, userService: UserService) {
             post {
                 val principal = call.principal<UserIdPrincipal>()
                 if (principal != null) {
-                    val (username, role) = principal.name.split("|GUARDIAN|")
-                    val token = jwtUtil.generateToken(username, role)
+                    val (username, access) = principal.name.split(DELIMITER)
+                    val token = jwtUtil.generateToken(username, access)
                     call.respond(hashMapOf("token" to token))
                 } else {
                     call.respond(

@@ -1,6 +1,6 @@
 package repositories
 
-import common.db.DatabaseManager.executeInTransaction
+import common.db.executeInTransaction
 import common.security.Hasher
 import models.User
 import models.requests.UpsertUserRequest

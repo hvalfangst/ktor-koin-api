@@ -2,9 +2,13 @@ package services
 
 import models.User
 import models.requests.UpsertUserRequest
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import repositories.UserRepository
 
-class UserService(private val userRepository: UserRepository) {
+class UserService: KoinComponent {
+
+    private val userRepository: UserRepository by inject()
 
      suspend fun getUserById(id: Int): User? {
             return userRepository.getUserById(id)

@@ -19,6 +19,7 @@ class AccessControl {
         }
 
         private fun hasAccess(requiredAccess: Access, userAccess: Access): Boolean {
+
             // ADMIN has access to CRUD
             if (userAccess == Access.ADMIN) {
                 return true
@@ -38,7 +39,7 @@ class AccessControl {
                 }
             }
 
-            // User does not have the required role
+            // User does not have the required access right
             return false
         }
     }

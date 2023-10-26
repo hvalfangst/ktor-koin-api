@@ -2,9 +2,13 @@ package services
 
 import models.Hero
 import models.requests.UpsertHeroRequest
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import repositories.HeroRepository
 
-class HeroService(private val heroRepository: HeroRepository) {
+class HeroService: KoinComponent {
+
+    private val heroRepository: HeroRepository by inject()
 
     suspend fun createHero(request: UpsertHeroRequest): Hero? {
         return heroRepository.createHeroResponse(request)

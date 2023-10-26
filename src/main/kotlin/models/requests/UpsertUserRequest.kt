@@ -1,14 +1,14 @@
 package models.requests
 
 import kotlinx.serialization.Serializable
-import models.Role
+import models.Access
 
 @Serializable
 data class UpsertUserRequest(
     val email: String,
     val password: String,
     val fullName: String,
-    val role: Role
+    val access: Access
 ) {
     init {
         require(isValidEmail(email)) { "Invalid email address format" }

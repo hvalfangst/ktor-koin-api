@@ -21,6 +21,13 @@ enum class ErrorMessage(val message: String, val httpStatusCode: HttpStatusCode)
     HERO_UPDATE_FAILED("Failed to update hero", HttpStatusCode.BadRequest),
     HERO_DELETION_FAILED("Failed to delete hero", HttpStatusCode.BadRequest),
 
+    // Ability related errors
+    ABILITY_ALREADY_EXISTS("An ability associated with the given name already exists in the system", HttpStatusCode.BadRequest),
+    ABILITY_NONEXISTENT("The requested ability does not exist", HttpStatusCode.NotFound),
+    ABILITY_CREATION_FAILED("Failed to create ability", HttpStatusCode.BadRequest),
+    ABILITY_UPDATE_FAILED("Failed to update ability", HttpStatusCode.BadRequest),
+    ABILITY_DELETION_FAILED("Failed to delete ability", HttpStatusCode.BadRequest),
+
     // Request body error
     REQUEST_BODY_VALIDATION_FAILURE("Validation of request body failed", HttpStatusCode.BadRequest),
 
@@ -28,6 +35,8 @@ enum class ErrorMessage(val message: String, val httpStatusCode: HttpStatusCode)
     AUTH_INVALID_HEADER("Missing or malformed authorization header detected", HttpStatusCode.Unauthorized),
     AUTH_MISSING_USER("Failed to identify any users matching mail associated with 'username' in Basic header", HttpStatusCode.Unauthorized),
     AUTH_PASSWORD_MISMATCH("Password mismatch between header content and database detected", HttpStatusCode.Unauthorized);
+
+
 
 
 }

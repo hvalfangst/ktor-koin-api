@@ -1,6 +1,6 @@
 package repositories
 
-import common.db.DatabaseManager.executeInTransaction
+import common.db.executeInTransaction
 import models.Hero
 import models.tables.HeroesTable
 import models.requests.UpsertHeroRequest

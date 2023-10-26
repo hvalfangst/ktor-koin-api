@@ -1,4 +1,4 @@
-# Ktor API with auth Middleware
+# Ktor Koin API with Flyway, Exposed and JWT using Maven
 
 
 ## Requirements
