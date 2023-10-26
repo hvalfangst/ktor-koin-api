@@ -1,5 +1,6 @@
 import common.config.initializeAppConfigSingleton
 import common.db.DatabaseManager
+import common.security.AccessControl.Companion.DELIMITER
 import common.security.Hasher
 import common.security.JwtUtil
 import io.ktor.serialization.kotlinx.json.*
@@ -7,12 +8,15 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
+import repositories.AbilityRepository
+import repositories.HeroRepository
 import repositories.UserRepository
+import routes.abilitiesRoute
 import routes.heroesRoute
 import routes.usersRoute
-import services.UserService
-import repositories.HeroRepository
+import services.AbilityService
 import services.HeroService
+import services.UserService
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -45,6 +49,7 @@ fun Application.module() {
     install(Routing) {
         usersRoute(jwtUtil, UserService(UserRepository()))
         heroesRoute(HeroService(HeroRepository()))
+        abilitiesRoute(AbilityService(AbilityRepository()))
     }
 }
 
@@ -54,7 +59,7 @@ private fun AuthenticationConfig.basicAuthMiddleware() {
             val (username, password) = credentials
             val user = UserRepository().getUserByEmail(username)
             if (user != null && Hasher.verify(password, user.password)) {
-                UserIdPrincipal("$username|GUARDIAN|${user.role}")
+                UserIdPrincipal("$username${DELIMITER}${user.access}")
             } else {
                 null
             }
@@ -62,16 +67,17 @@ private fun AuthenticationConfig.basicAuthMiddleware() {
     }
 }
 
+// TODO: Consider adapting this to Handler instead for call context on exceptions
 private fun AuthenticationConfig.jwtAuthMiddleware(jwtUtil: JwtUtil) {
     bearer("auth-jwt") {
         authenticate { credential ->
             val decodedJWT = jwtUtil.verifyToken(credential.token)
             val usernameClaim = decodedJWT.getClaim("username")
-            val roleClaim = decodedJWT.getClaim("role")
+            val accessClaim = decodedJWT.getClaim("access")
 
-            if (!usernameClaim.isNull && !roleClaim.isNull) {
-                val role = roleClaim.asString()
-                UserIdPrincipal(role)
+            if (!usernameClaim.isNull && !accessClaim.isNull) {
+                val access = accessClaim.asString()
+                UserIdPrincipal(access)
             } else {
                 null
             }

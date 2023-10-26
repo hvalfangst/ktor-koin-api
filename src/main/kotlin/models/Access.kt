@@ -1,6 +1,6 @@
 package models
 
-enum class Role(val roleName: String) {
+enum class Access(val toString: String) {
     VIEWER( "VIEWER"),
     CREATOR("CREATOR"),
     EDITOR("EDITOR"),

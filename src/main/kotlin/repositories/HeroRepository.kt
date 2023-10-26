@@ -1,5 +1,6 @@
 package repositories
 
+import common.db.DatabaseManager.executeInTransaction
 import models.Hero
 import models.tables.HeroesTable
 import models.requests.UpsertHeroRequest
@@ -8,51 +9,75 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class HeroRepository {
 
-     fun getAllHeroes(): List<Hero> {
-        return HeroesTable.selectAll().map { toHero(it) }
+     suspend fun getAllHeroes(): List<Hero> {
+         return executeInTransaction {
+             HeroesTable.selectAll().map { toHero(it) }
+         }
     }
 
-     fun getHeroById(id: Int): Hero? {
-        return HeroesTable.select { HeroesTable.id eq id }
+    suspend fun getHeroById(id: Int): Hero? {
+         return executeInTransaction {
+             HeroesTable.select { HeroesTable.id eq id }
+                 .map { toHero(it) }
+                 .singleOrNull()
+         }
+    }
+
+    suspend fun getHeroByName(name: String): Hero? {
+        return executeInTransaction {
+            HeroesTable.select { HeroesTable.name eq name }
                 .map { toHero(it) }
                 .singleOrNull()
+        }
     }
 
-     fun getHeroByName(name: String): Hero? {
-        return HeroesTable.select { HeroesTable.name eq name }
-                .map { toHero(it) }
-                .singleOrNull()
+    suspend fun createHeroResponse(request: UpsertHeroRequest): Hero {
+         return executeInTransaction {
+             var createdHeroId: Int? = null
+
+             createdHeroId = HeroesTable.insert {
+                 it[name] = request.name
+                 it[hitPoints] = request.hitPoints
+                 it[attack] = request.attack
+                 it[damage] = request.damage
+                 it[armorClass] = request.armorClass
+                 it[level] = request.level
+             } get HeroesTable.id
+             createHeroResponse(createdHeroId, request)
+         }
     }
 
-     fun createHero(request: UpsertHeroRequest): Hero? {
-        var createdHeroId: Int? = null
 
-            createdHeroId = HeroesTable.insert {
-                it[name] = request.name
-                it[hitPoints] = request.hitPoints
-                it[attack] = request.attack
-                it[damage] = request.damage
-                it[armorClass] = request.armorClass
-            } get HeroesTable.id
-
-        return createdHeroId?.let { getHeroById(it) }
-    }
-
-     fun updateHero(id: Int, request: UpsertHeroRequest): Hero? {
+    suspend fun updateHero(id: Int, request: UpsertHeroRequest): Hero? {
+        return executeInTransaction {
             HeroesTable.update({ HeroesTable.id eq id }) {
                 it[name] = request.name
                 it[hitPoints] = request.hitPoints
                 it[attack] = request.attack
                 it[damage] = request.damage
                 it[armorClass] = request.armorClass
+                it[level] = request.level
             }
-        return getHeroById(id)
+            createHeroResponse(id, request)
+        }
     }
 
-    fun deleteHero(id: Int): Boolean {
-        val deletedRows = HeroesTable.deleteWhere { HeroesTable.id eq id }
-        return deletedRows > 0
+    suspend fun deleteHero(id: Int): Boolean {
+        return executeInTransaction {
+            val deletedRows = HeroesTable.deleteWhere { HeroesTable.id eq id }
+            deletedRows > 0
+        }
     }
+
+    private fun createHeroResponse(createdHeroId: Int, request: UpsertHeroRequest) = Hero(
+        id = createdHeroId,
+        name = request.name,
+        hitPoints = request.hitPoints,
+        attack = request.attack,
+        damage = request.damage,
+        armorClass = request.armorClass,
+        level = request.level
+    )
 
     private fun toHero(row: ResultRow): Hero =
         Hero(
@@ -61,7 +86,7 @@ class HeroRepository {
             hitPoints = row[HeroesTable.hitPoints],
             attack = row[HeroesTable.attack],
             damage = row[HeroesTable.damage],
-            armorClass = row[HeroesTable.armorClass]
-
+            armorClass = row[HeroesTable.armorClass],
+            level = row[HeroesTable.level]
         )
 }

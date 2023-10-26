@@ -9,5 +9,6 @@ data class Hero(
     val hitPoints: Int,
     val attack: Int,
     val damage: Int,
-    val armorClass: Int
+    val armorClass: Int,
+    val level: Int
 )
